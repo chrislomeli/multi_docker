@@ -1,0 +1,19 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t chrislomeli/react_test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true chrislomeli/react_test npm test
+after_success:
+  - docker build -t chrislomeli/multi-client ./client
+  - docker build -t chrislomeli/multi-nginx ./nginx
+  - docker build -t chrislomeli/multi-server ./server
+  - docker build -t chrislomeli/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker lotin -u "$DOCKER_ID" --password-stdin
+  - docker push chrislomeli/multi-client
+  - docker push chrislomeli/multi-nginx
+  - docker push chrislomeli/multi-server
+  - docker push chrislomeli/multi-worker
+
+
